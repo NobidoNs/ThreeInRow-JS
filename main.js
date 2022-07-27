@@ -61,11 +61,12 @@ function tap(x, y) {
   } else {
     const x1 = first_element[0]
     const y1 = first_element[1]
-    swap(x1, y1, x, y)
+    swap(x1, y1, x, y, table)
+    select(x1, y1, table)
   }
 }
 
-function swap(x1, y1, x2, y2) {
+function swap(x1, y1, x2, y2, table) {
   if ((x1+1 == x2 && y1 == y2) || (x1-1 == x2 && y1 == y2) ||
   (x1 == x2 && y1+1 == y2) || (x1 == x2 && y1-1 == y2)) {
     const c1 = whatIsColor(table, x2, y2)
@@ -76,8 +77,8 @@ function swap(x1, y1, x2, y2) {
       chColor(x1, y1, c1, table)
       first_element = []
     }
-    select(x1, y1, table)
   }
+  checker(table)
 }
 
 function whatIsColor(table, x, y) {
@@ -108,4 +109,51 @@ function select(x, y, table) {
   } else {
     $(el).css('border-radius', "7px");
     }
+}
+
+function checker(table) {
+  const colors_id = get_pos(table)
+  check(colors_id)
+}
+
+function check(colors_id) {
+  // console.log(colors_id["red"][0]["x"])
+  for (let i in colors_id) {
+    for (let n in colors_id[i]) {
+      const y1 = colors_id[i][n]["y"]
+      const y2 = colors_id[i][n+1]["y"]
+      const x1 = colors_id[i][n]["x"]+1
+      const x2 = colors_id[i][n+1]["x"]
+      if (y1 == y2 && x1 == x2) {
+        
+      }
+    }
+  }
+}
+
+function get_pos(table) {
+  const colors_id = {
+    red:[],
+    blue:[],
+    green:[],
+    violet:[],
+    pink:[]
+  }
+  
+  const red_id = []
+  const colors = ["red", "blue", "green", "violet", "pink"]
+  for (let y = 0; y <= table.cols; y++) {
+    for (let x = 0; x <= table.rows; x++) {
+      const color = whatIsColor(table, x, y)
+      let r = 0
+      for (let i in colors_id) {
+        if (color == colors[r]) {
+          colors_id[i].push({x, y})
+        }
+        r += 1
+      }
+
+    }
+  }
+  return colors_id
 }
