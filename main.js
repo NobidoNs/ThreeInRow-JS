@@ -112,48 +112,49 @@ function select(x, y, table) {
 }
 
 function checker(table) {
-  const colors_id = get_pos(table)
-  check(colors_id)
+  // const colors_id = get_pos(table, ar)
+  // check(colors_id)
 }
+
+ar = ["green", "red", "red", "red", "green", "blue", "blue", "blue", "green"]
+get_pos(table, ar)
 
 function check(colors_id) {
-  // console.log(colors_id["red"][0]["x"])
-  for (let i in colors_id) {
-    for (let n in colors_id[i]) {
-      const y1 = colors_id[i][n]["y"]
-      const y2 = colors_id[i][n+1]["y"]
-      const x1 = colors_id[i][n]["x"]+1
-      const x2 = colors_id[i][n+1]["x"]
-      if (y1 == y2 && x1 == x2) {
-        
-      }
-    }
-  }
 }
 
-function get_pos(table) {
-  const colors_id = {
-    red:[],
-    blue:[],
-    green:[],
-    violet:[],
-    pink:[]
-  }
-  
-  const red_id = []
+function get_pos(table, array) {
   const colors = ["red", "blue", "green", "violet", "pink"]
-  for (let y = 0; y <= table.cols; y++) {
-    for (let x = 0; x <= table.rows; x++) {
-      const color = whatIsColor(table, x, y)
-      let r = 0
-      for (let i in colors_id) {
-        if (color == colors[r]) {
-          colors_id[i].push({x, y})
-        }
-        r += 1
-      }
-
-    }
+  let result = []
+  let cls = {
+    red : 0,
+    blue : 0,
+    green : 0,
+    violet : 0,
+    pink : 0
   }
-  return colors_id
+  let rec = 0
+  for (x in array) {
+    let c = array[x]
+    const off = colors.filter(item => item != c)
+    cls[c] += 1
+    off.forEach(item => {
+      if (cls[item] >= 3) {
+        for (let i = 1; i <= cls[item]; i++) {
+          result.push(rec-i)
+        }
+      }
+      cls[item] = 0
+    })
+    rec += 1
+  }
+  colors.forEach(item => {
+    if (cls[item] >= 3) {
+      for (let i = 0; i<=cls[item]-1; i++) {
+        const l = array.length - 1 - i
+        result.push(l)
+      }
+    }
+  })
+  console.log(result)
+
 }
