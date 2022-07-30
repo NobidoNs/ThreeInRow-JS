@@ -112,14 +112,12 @@ function select(x, y, table) {
 }
 
 function checker(table) {
-  // const colors_id = get_pos(table, ar)
-  // check(colors_id)
+  const colors_id = get_pos(table, table.all)
+  del(colors_id)
 }
 
-ar = ["green", "red", "red", "red", "green", "blue", "blue", "blue", "green"]
-get_pos(table, ar)
-
-function check(colors_id) {
+function del(colors_id) {
+  
 }
 
 function get_pos(table, array) {
