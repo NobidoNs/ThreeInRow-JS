@@ -62,7 +62,6 @@ function tap(x, y) {
     const x1 = first_element[0]
     const y1 = first_element[1]
     swap(x1, y1, x, y, table)
-    select(x1, y1, table)
   }
 }
 
@@ -75,9 +74,10 @@ function swap(x1, y1, x2, y2, table) {
       console.log("swap")
       chColor(x2, y2, c2, table)
       chColor(x1, y1, c1, table)
-      first_element = []
     }
   }
+  select(x1, y1, table)
+  first_element = []
   checker(table)
 }
 
@@ -107,52 +107,149 @@ function select(x, y, table) {
   if ($(el).css('border-radius') == ("7px")) {
     $(el).css('border-radius', "0px")  
   } else {
-    $(el).css('border-radius', "7px");
+    $(el).css('border-radius', "7px")
     }
 }
 
 function checker(table) {
-  const colors_id = get_pos(table, table.all)
-  del(colors_id)
+  get_pos(table)
 }
 
-function del(colors_id) {
-  
-}
 
-function get_pos(table, array) {
-  const colors = ["red", "blue", "green", "violet", "pink"]
-  let result = []
-  let cls = {
-    red : 0,
-    blue : 0,
-    green : 0,
-    violet : 0,
-    pink : 0
-  }
-  let rec = 0
-  for (x in array) {
-    let c = array[x]
-    const off = colors.filter(item => item != c)
-    cls[c] += 1
-    off.forEach(item => {
-      if (cls[item] >= 3) {
-        for (let i = 1; i <= cls[item]; i++) {
-          result.push(rec-i)
+function get_pos(table) {
+  result = []
+  for (let x = 0; x < table.cols; x++) {
+    const cls=[]
+    let rec = 0
+    for (let y = 0; y < table.rows; y++) {
+      cls.push({
+        color:whatIsColor(table, x, table.rows-y-1),
+        pos:(table.rows-y)*table.rows + x - 15
+      })
+      // cl = whatIsColor(table, x, table.rows-y-1)
+
+    }
+    for (item in cls) {
+      if (rec == 0) {
+        cont_item = cls[item].color
+        rec += 1
+      } else {
+        if (cls[item].color == cont_item) {
+          rec += 1
+        } else if (rec >= 3) {
+          let i1 = 0
+          for (let io = 0; io < rec; io++) {
+            i1 = io*15
+            result.push(cls[item-1].pos+i1)
+          }
+          rec = 1
+          cont_item = cls[item].color
+        } else {
+          rec = 1
+          cont_item = cls[item].color
         }
       }
-      cls[item] = 0
-    })
-    rec += 1
-  }
-  colors.forEach(item => {
-    if (cls[item] >= 3) {
-      for (let i = 0; i<=cls[item]-1; i++) {
-        const l = array.length - 1 - i
-        result.push(l)
-      }
     }
-  })
+  }
   console.log(result)
 
+  for (i in result) {
+    y = Math.trunc(result[i]/table.rows)
+    x = result[i]-y*table.rows 
+    // console.log(x, y)
+    select(x, y, table)
+  }
+
+  // const r1 = result.map((num) => {
+  //   console.log(num)
+  //   const y = parseInt(num/table.rows)
+  //   const x = num-y*table.rows
+  //   return {y,x}
+  // })
+  // for (i in r1) {
+  //   chColor(i[0], i[1], "black", table)
+  // }
+  // console.log(r1)
 }
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+// function get_pos(table, array) {
+//   const colors = ["red", "blue", "green", "violet", "pink"]
+//   let result = []
+//   let cls = {
+//     red : 0,
+//     blue : 0,
+//     green : 0,
+//     violet : 0,
+//     pink : 0
+//   }
+//   let rec = 0
+//   for (x in array) {
+//     let c = array[x]
+//     const off = colors.filter(item => item != c)
+//     cls[c] += 1
+
+//     off.forEach(item => {
+//       if (cls[item] >= 3) {
+//         for (let i = 1; i <= cls[item]; i++) {
+//           result.push(rec-i)
+//         }
+//       }
+//       cls[item] = 0
+//     })
+
+//     rec += 1
+//   }
+
+//   colors.forEach(item => {
+//     if (cls[item] >= 3) {
+//       for (let i = 0; i<=cls[item]-1; i++) {
+//         const l = array.length - 1 - i
+//         result.push(l)
+//       }
+//     }
+//   })
+//   console.log(result)
+
+// }
