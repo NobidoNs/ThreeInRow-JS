@@ -131,7 +131,9 @@ function checker(table, h, v) {
       st1.push(table.all[ind1])
     }
     ret1 = get_pos(table, st1)
-    horis_distr(ret1, y, v, table)
+    for (let i = 0; i < ret1.length; i++) {
+      horis_distr(ret1[i], y, v, table)
+    }
   }
   // vertical
   for (let x = 0; x < table.cols; x++) {
@@ -152,21 +154,65 @@ function checker(table, h, v) {
 }
 
 function horis_distr(array, y, v, table) {
-  l = array.length
+  l = array.length-1
+  rec = 0
   if (l > 0) {
+    del_stack(array, y, table)
     if (v) {
-      for (let a = array[0]; a >= 0; a-=1) {
-        if (a-l>=0) {
-          c = whatIsColor(table, a-l, y)
-          chColor(a, y, c, table)
-        } else {
-          let r = getRandomInt(table.colors.length)
-          chColor(a, y, table.colors[r], table)
-        }
+      for (let i = 0; i < l+1; i++) {
+        st = cut_str(array[l]+i, y, table)
+        slip_one(st, y, table)
+        rec += 1
       }
-    const r = getRandomInt(table.colors.length)
-    chColor(0, y, table.colors[r], table)
+    } else {
+      for (let i = 0; i < l+1; i++) {
+        slip_three(array[l], y, array.length, table)
+      }
     }
+  }
+  return rec
+}
+
+function slip_one(st, y, table) {
+  ret = []
+  for (let a = 0; a < st.length; a++) {
+    let x = st.length - a 
+    if (x >= table.cols) {
+    } else {
+      cl = whatIsColor(table, x-1, y)
+      chColor(x, y, cl, table)
+      ret.push(cl)
+    }
+  }
+  let r = getRandomInt(table.colors.length)
+  chColor(0, y, table.colors[r], table)
+}
+
+function slip_three(x_one, y, len, table) {
+  for (let i = 0; i < len-1; i++) {
+    let x = x_one + i
+    for (let a = 0; a < y; a++) {
+      let cl = whatIsColor(table, x, y-a-1)
+      chColor(x, y-a, cl, table)
+    }
+
+    let r = getRandomInt(table.colors.length)
+    chColor(x, 0, table.colors[r], table)
+  }
+}
+
+function cut_str(element, y, table) {
+  const st = []
+  for (let a = 0; a < element; a++) {
+    ind = y*table.cols+a
+    st.push(table.all[ind])
+  }
+  return st
+}
+
+function del_stack(elems, y, table) {
+  for (i in elems) {
+    chColor(elems[i], y, "black", table)
   }
 }
 
@@ -179,6 +225,7 @@ function vert_distr(array, x, h, table) {
 function get_pos(table, array) {
   const colors = ["red", "blue", "green", "violet", "pink"]
   let result = []
+  let res = []
   let cls = {
     red : 0,
     blue : 0,
@@ -197,8 +244,10 @@ function get_pos(table, array) {
     off.forEach(item => {
       if (cls[item] >= 3 ) {
         for (let i = 1; i <= cls[item]; i++) {
-          result.push(rec-i)
+          res.push(rec-i)
         }
+        result.push(res)
+        res = []
       }
       cls[item] = 0
     })
@@ -210,11 +259,67 @@ function get_pos(table, array) {
     if (cls[item] >= 3) {
       for (let i = 0; i<=cls[item]-1; i++) {
         const l = array.length - 1 - i
-        result.push(l)
+        res.push(l)
       }
+      result.push(res)
+      res = []
     }
   })
-
   return result
 
 }
+
+
+
+
+
+
+
+//             Test horis_distr
+// const tt2 = {
+//   rows : 1,
+//   cols : 10,
+//   tableObj: null,
+//   colors: ["red", "blue", "green", "violet", "pink"],
+//   all:["violet", "pink", "red", "blue", "pink", "violet", "black", "black", "black", "black"]
+// }
+
+// array = [9, 8, 7, 6]
+// a = tt2.all.slice(0, 6)
+// horis_distr(array, 0, true, tt2)
+// if (JSON.stringify(a) == JSON.stringify(tt2.all.slice(-6))) {
+//   console.log("Yes")
+// } else {
+//   console.log(a, tt2.all.slice(-6))
+// }
+
+//          Test slip_one
+// const table_test = {
+//   rows : 1,
+//   cols : 10,
+//   tableObj: null,
+//   colors: ["red", "blue", "green", "violet", "pink"],
+//   all:["red", "blue", "red", "violet", "pink", "red", "blue", "pink", "black", "black"]
+// }
+//
+// st = table_test.all.slice(0, 9)
+// console.log(table_test.all.slice(0), st)
+
+// slip(st, 0, table_test)
+// console.log(table_test.all.slice(0))
+
+//            Test slip_three 
+const table_test = {
+  rows : 3,
+  cols : 3,
+  tableObj: null,
+  colors: ["red", "blue", "green", "violet", "pink"],
+  all:[
+  "red", "blue", "red", 
+  "black", "black", "black",
+  "violet", "pink", "red", 
+  ]
+}
+slip_three(0, 1, 3, table_test)
+console.log("red", "blue", "red", "violet", "pink", "red")
+console.log(table_test.all.splice(3))
