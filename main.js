@@ -195,8 +195,7 @@ function slip_one_x(st, x, table) {
   ret = []
   for (let a = 0; a < st.length; a++) {
     let y = st.length - a 
-    if (y >= table.rows) {
-    } else {
+    if (y < table.rows) {
       cl = whatIsColor(table, x, y-1)
       chColor(x, y, cl, table)
       ret.push(cl)
@@ -264,22 +263,21 @@ function del_stack(elems, x, y, table) {
 }
 
 function vert_distr(array, x, h, table) {
-  // l = array.length-1
-  // rec = 0
-  // del_stack(array, 0, 0, table)
-  // if (l > 0) {
-  //   del_stack(array, x, -1, table)
-  //   if (h) {
-  //     for (let i = 0; i < l+1; i++) {
-  //       st = cut_str(array[l]+i, x, -1, table)
-  //       slip_one_x(st, x, table)
-  //       rec += 1
-  //     }
-  //   } else {
-  //     slip_three_x(array[l], x, array.length, table)
-  //   }
-  // }
-  // return rec
+  l = array.length-1
+  rec = 0
+  if (l > 0) {
+    del_stack(array, x, -1, table)
+    if (h) {
+      for (let i = 0; i < l+1; i++) {
+        st = cut_str(array[l]+i, x, -1, table)
+        slip_one_x(st, x, table)
+        rec += 1
+      }
+    } else {
+      slip_three_x(array[l], x, array.length, table)
+    }
+  }
+  return rec
 }
 
 function get_pos(table, array) {
