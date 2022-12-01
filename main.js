@@ -90,6 +90,9 @@ function swap(x1, y1, x2, y2, table) {
 
 function whatIsColor(table, x, y) {
   let n = y * table.cols + x
+  if (n < 0 || n > table.rows*table.cols) {
+    return false
+  }
   let color = table.all[n]
 
   const first = $("td");
@@ -144,12 +147,14 @@ function checker(table, h, v) {
     }
     ret2 = get_pos(table, st2)
     ret3 = []
-    for (let i in ret2) {
-      x2 = parseInt(ret2[i]/table.cols)
-      y2 = ret2[i] - ret2[i]*x2
-      ret3.push(y2)
-    } 
-    vert_distr(ret3, x, h, table)
+    for (let a = 0; a < ret2.length; a++) { 
+      for (let i in ret2[a]) { 
+        x2 = parseInt(ret2[a][i]/table.cols)
+        y2 = ret2[a][i] - ret2[a][i]*x2
+        ret3.push(y2)
+      } 
+      vert_distr(ret3, x, h, table)
+    }
   }
 }
 
@@ -157,23 +162,21 @@ function horis_distr(array, y, v, table) {
   l = array.length-1
   rec = 0
   if (l > 0) {
-    del_stack(array, y, table)
+    del_stack(array, -1, y, table)
     if (v) {
       for (let i = 0; i < l+1; i++) {
-        st = cut_str(array[l]+i, y, table)
-        slip_one(st, y, table)
+        st = cut_str(array[l]+i, -1, y, table)
+        slip_one_y(st, y, table)
         rec += 1
       }
     } else {
-      for (let i = 0; i < l+1; i++) {
-        slip_three(array[l], y, array.length, table)
-      }
+      slip_three_y(array[l], y, array.length, table)
     }
   }
   return rec
 }
 
-function slip_one(st, y, table) {
+function slip_one_y(st, y, table) {
   ret = []
   for (let a = 0; a < st.length; a++) {
     let x = st.length - a 
@@ -188,8 +191,23 @@ function slip_one(st, y, table) {
   chColor(0, y, table.colors[r], table)
 }
 
-function slip_three(x_one, y, len, table) {
-  for (let i = 0; i < len-1; i++) {
+function slip_one_x(st, x, table) {
+  ret = []
+  for (let a = 0; a < st.length; a++) {
+    let y = st.length - a 
+    if (y >= table.rows) {
+    } else {
+      cl = whatIsColor(table, x, y-1)
+      chColor(x, y, cl, table)
+      ret.push(cl)
+    }
+  }
+  let r = getRandomInt(table.colors.length)
+  chColor(x, 0, table.colors[r], table)
+}
+
+function slip_three_y(x_one, y, len, table) {
+  for (let i = 0; i < len; i++) {
     let x = x_one + i
     for (let a = 0; a < y; a++) {
       let cl = whatIsColor(table, x, y-a-1)
@@ -201,25 +219,67 @@ function slip_three(x_one, y, len, table) {
   }
 }
 
-function cut_str(element, y, table) {
+function slip_three_x(y_one, x, len, table) {
+  for (let i = 0; i < len; i++) {
+    let y = y_one + i
+    for (let a = 0; a < x; a++) {
+      let cl = whatIsColor(table, x-a-1, y)
+      chColor(x-a, y, cl, table)
+    }
+    let r = getRandomInt(table.colors.length)
+    chColor(0, y, table.colors[r], table)
+  }
+}
+
+function cut_str(element, x, y, table) {
   const st = []
-  for (let a = 0; a < element; a++) {
-    ind = y*table.cols+a
-    st.push(table.all[ind])
+  if (x == -1) {
+    for (let a = 0; a < element; a++) {
+      ind = y*table.cols+a
+      st.push(table.all[ind])
+    }
+  } else if (y==-1) {
+    for (let a = 0; a < element; a++) {
+      ind = a*table.cols+x
+      st.push(table.all[ind])
+    }
+  } else {
+    console.log(cut_str_er)
   }
   return st
 }
 
-function del_stack(elems, y, table) {
-  for (i in elems) {
-    chColor(elems[i], y, "black", table)
+function del_stack(elems, x, y, table) {
+  if (x == -1) {
+    for (i in elems) {
+      chColor(elems[i], y, "black", table)
+    }
+  } else if (y == -1) {
+    for (i in elems) {
+      chColor(x, elems[i], "black", table)
+    }
+  } else {
+    console.log("del_stack_er")
   }
 }
 
 function vert_distr(array, x, h, table) {
-  for (i in array) {
-    select(x, array[i], table)
-  }
+  // l = array.length-1
+  // rec = 0
+  // del_stack(array, 0, 0, table)
+  // if (l > 0) {
+  //   del_stack(array, x, -1, table)
+  //   if (h) {
+  //     for (let i = 0; i < l+1; i++) {
+  //       st = cut_str(array[l]+i, x, -1, table)
+  //       slip_one_x(st, x, table)
+  //       rec += 1
+  //     }
+  //   } else {
+  //     slip_three_x(array[l], x, array.length, table)
+  //   }
+  // }
+  // return rec
 }
 
 function get_pos(table, array) {
@@ -309,17 +369,18 @@ function get_pos(table, array) {
 // console.log(table_test.all.slice(0))
 
 //            Test slip_three 
-const table_test = {
-  rows : 3,
-  cols : 3,
-  tableObj: null,
-  colors: ["red", "blue", "green", "violet", "pink"],
-  all:[
-  "red", "blue", "red", 
-  "black", "black", "black",
-  "violet", "pink", "red", 
-  ]
-}
-slip_three(0, 1, 3, table_test)
-console.log("red", "blue", "red", "violet", "pink", "red")
-console.log(table_test.all.splice(3))
+
+// const table_test = {
+//   rows : 3,
+//   cols : 3,
+//   tableObj: null,
+//   colors: ["red", "blue", "green", "violet", "pink"],
+//   all:[
+//   "red", "blue", "red", 
+//   "black", "black", "black",
+//   "violet", "pink", "red", 
+//   ]
+// }
+// slip_three(0, 1, 3, table_test)
+// console.log("red", "blue", "red", "violet", "pink", "red")
+// console.log(table_test.all.splice(3))
