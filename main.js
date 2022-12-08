@@ -54,6 +54,8 @@ table.generate()
 
 let first_element = []
 
+checker(true, false, table)
+
 async function tap(x, y) {
   if (first_element.length == 0) {
     first_element = [x, y]
@@ -85,7 +87,7 @@ async function swap(x1, y1, x2, y2, table) {
   }
   select(x1, y1, table)
   first_element = []
-  await checker(table, h, v)
+  await checker(h, v, table)
 }
 
 function whatIsColor(table, x, y) {
@@ -134,7 +136,40 @@ function getRandomInt(max) {
   return Math.floor(Math.random() * max);
 }
 
-async function checker(table, h, v) {
+async function checker(h, v, table) {
+  for (let i = 0; i < 25; i++) {
+    let clean = true
+    for (let y = 0; y < table.rows; y++) {
+      str = []
+      for (let x = 0; x < table.cols; x++) {
+        str.push(whatIsColor(table, x, y))
+      }
+      ret1 = get_pos(str)
+      if (ret1.length == 0) {
+        await check(table, h, v)
+        clean = false
+        break
+      }
+    }
+    for (let y = 0; y < table.rows; y++) {
+      str = []
+      for (let x = 0; x < table.cols; x++) {
+        str.push(whatIsColor(table, y, x))
+      }
+      ret2 = get_pos(str)
+      if (ret2.length == 0) {
+        await check(table, h, v)
+        clean = false
+        break
+      }
+    }
+    if (clean == true) {
+      break
+    }
+  }
+}
+
+async function check(table, h, v) {
   // horizontal
   for (let y = 0; y < table.rows; y++) {
     st1 = []
@@ -162,7 +197,7 @@ async function checker(table, h, v) {
         y2 = ret2[a][i] - ret2[a][i]*x2
         ret3.push(y2)
       } 
-      vert_distr(ret3, x, h, table)
+      await vert_distr(ret3, x, h, table)
     }
   }
 }
@@ -198,12 +233,11 @@ async function slip_one_y(st, y, table) {
   }
   let r = getRandomInt(table.colors.length)
   chColor(0, y, table.colors[r], table)
-  await pause(1000)
+  await pause(300)
   draw(table)
-  console.log(1)
 }
 
-function slip_one_x(st, x, table) {
+async function slip_one_x(st, x, table) {
   ret = []
   for (let a = 0; a < st.length; a++) {
     let y = st.length - a 
@@ -215,6 +249,8 @@ function slip_one_x(st, x, table) {
   }
   let r = getRandomInt(table.colors.length)
   chColor(x, 0, table.colors[r], table)
+  await pause(300)
+  draw(table)
 }
 
 function slip_three_y(x_one, y, len, table) {
@@ -282,7 +318,7 @@ async function vert_distr(array, x, h, table) {
     if (h) {
       for (let i = 0; i < l+1; i++) {
         st = cut_str(array[l]+i, x, -1, table)
-        slip_one_x(st, x, table)
+        await slip_one_x(st, x, table)
         rec += 1
       }
     } else {
