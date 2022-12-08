@@ -54,18 +54,18 @@ table.generate()
 
 let first_element = []
 
-function tap(x, y) {
+async function tap(x, y) {
   if (first_element.length == 0) {
     first_element = [x, y]
     select(x, y, table)
   } else {
     const x1 = first_element[0]
     const y1 = first_element[1]
-    swap(x1, y1, x, y, table)
+    await swap(x1, y1, x, y, table)
   }
 }
 
-function swap(x1, y1, x2, y2, table) {
+async function swap(x1, y1, x2, y2, table) {
   let v = false
   let h = false
   if ((x1+1 == x2 && y1 == y2) || (x1-1 == x2 && y1 == y2) ||
@@ -85,7 +85,7 @@ function swap(x1, y1, x2, y2, table) {
   }
   select(x1, y1, table)
   first_element = []
-  checker(table, h, v)
+  await checker(table, h, v)
 }
 
 function whatIsColor(table, x, y) {
@@ -110,6 +110,15 @@ function chColor(x, y, color, table) {
   table.all[n] = color
 }
 
+function draw(table) {
+  for (let n = 0; n < table.all.length - 1; n++) {
+    let y = Math.floor(n / table.cols)
+    let x = n - y*table.cols
+    let cl = table.all[n]
+    chColor(x, y, cl,table)
+  }
+}
+
 function select(x, y, table) {
   const first = $("td");
   let n = y * table.cols + x
@@ -125,7 +134,7 @@ function getRandomInt(max) {
   return Math.floor(Math.random() * max);
 }
 
-function checker(table, h, v) {
+async function checker(table, h, v) {
   // horizontal
   for (let y = 0; y < table.rows; y++) {
     st1 = []
@@ -135,7 +144,7 @@ function checker(table, h, v) {
     }
     ret1 = get_pos(table, st1)
     for (let i = 0; i < ret1.length; i++) {
-      horis_distr(ret1[i], y, v, table)
+      await horis_distr(ret1[i], y, v, table)
     }
   }
   // vertical
@@ -146,8 +155,8 @@ function checker(table, h, v) {
       st2.push(table.all[ind2])
     }
     ret2 = get_pos(table, st2)
-    ret3 = []
     for (let a = 0; a < ret2.length; a++) { 
+      ret3 = []
       for (let i in ret2[a]) { 
         x2 = parseInt(ret2[a][i]/table.cols)
         y2 = ret2[a][i] - ret2[a][i]*x2
@@ -158,7 +167,7 @@ function checker(table, h, v) {
   }
 }
 
-function horis_distr(array, y, v, table) {
+async function horis_distr(array, y, v, table) {
   l = array.length-1
   rec = 0
   if (l > 0) {
@@ -166,7 +175,7 @@ function horis_distr(array, y, v, table) {
     if (v) {
       for (let i = 0; i < l+1; i++) {
         st = cut_str(array[l]+i, -1, y, table)
-        slip_one_y(st, y, table)
+        await slip_one_y(st, y, table)
         rec += 1
       }
     } else {
@@ -176,7 +185,7 @@ function horis_distr(array, y, v, table) {
   return rec
 }
 
-function slip_one_y(st, y, table) {
+async function slip_one_y(st, y, table) {
   ret = []
   for (let a = 0; a < st.length; a++) {
     let x = st.length - a 
@@ -189,6 +198,9 @@ function slip_one_y(st, y, table) {
   }
   let r = getRandomInt(table.colors.length)
   chColor(0, y, table.colors[r], table)
+  await pause(1000)
+  draw(table)
+  console.log(1)
 }
 
 function slip_one_x(st, x, table) {
@@ -262,7 +274,7 @@ function del_stack(elems, x, y, table) {
   }
 }
 
-function vert_distr(array, x, h, table) {
+async function vert_distr(array, x, h, table) {
   l = array.length-1
   rec = 0
   if (l > 0) {
@@ -327,7 +339,13 @@ function get_pos(table, array) {
 
 }
 
-
+async function pause(time) {
+  return new Promise((resolve, reject) => {
+    setTimeout(() => {
+      resolve()
+    }, time)
+  })
+}
 
 
 
